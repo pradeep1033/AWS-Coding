@@ -1,0 +1,33 @@
+#how to use boto3 to copy the code of a Lambda function and upload it to an S3 bucket as a zip file:
+
+#This code will download the code of the specified Lambda function, create a zip file with the code, and then upload the zip file to the specified S3 bucket. The zip file will contain a single file named "lambda_function.py".
+
+import boto3
+import io
+import zipfile
+
+# Create an S3 client
+s3 = boto3.client('s3')
+
+# Create a Lambda client
+lambda_client = boto3.client('lambda')
+
+# Get the name of the Lambda function
+function_name = "your_lambda_function_name"
+
+# Get the code of the Lambda function
+response = lambda_client.get_function(FunctionName=function_name)
+code = response['Code']
+
+# Create a memory file for the zip file
+memory_file = io.BytesIO()
+
+# Create the zip file
+with zipfile.ZipFile(memory_file, 'w') as z:
+    z.writestr("lambda_function.py", code['Location'])
+
+# Rewind the memory file
+memory_file.seek(0)
+
+# Upload the zip file to the S3 bucket
+s3.upload_fileobj(memory_file, "your_bucket_name", "your_zip_file_name.zip")
