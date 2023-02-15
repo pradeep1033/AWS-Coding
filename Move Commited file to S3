@@ -1,0 +1,57 @@
+#In this modified code, we simply add the string my-folder/ to the file_path variable, which creates a new object_key that includes the folder path my-folder.
+#When we call the put_object method, the committed file is uploaded to the specified folder location within the S3 bucket.
+
+import boto3
+
+# Create a CodeCommit client
+codecommit = boto3.client('codecommit')
+
+# Define the repository and branch name
+repository_name = 'my-repo'
+branch_name = 'main'
+
+# Get the most recent commit ID for the branch
+response = codecommit.get_branch(
+    repositoryName=repository_name,
+    branchName=branch_name
+)
+
+commit_id = response['branch']['commitId']
+print('Most recent commit ID:', commit_id)
+
+# List all files in the repository
+response = codecommit.list_files(
+    repositoryName=repository_name,
+    commitSpecifier=commit_id
+)
+
+files = response['files']
+
+# Create an S3 client
+s3 = boto3.client('s3')
+
+# Define the S3 bucket
+bucket_name = 'my-s3-bucket'
+
+# Loop through each file and upload its contents to S3
+for file in files:
+    file_path = file['absolutePath']
+
+    # Get the contents of the committed file
+    response = codecommit.get_blob(
+        repositoryName=repository_name,
+        blobId=commit_id,
+        filePath=file_path
+    )
+
+    file_content = response['content']
+
+    # Define the S3 object key with folder location
+    object_key = 'my-folder/' + file_path
+
+    # Upload the committed file to S3
+    s3.put_object(
+        Bucket=bucket_name,
+        Key=object_key,
+        Body=file_content
+    )
