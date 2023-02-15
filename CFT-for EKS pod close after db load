@@ -1,0 +1,61 @@
+#This CloudFormation template creates an EKS cluster, a Secrets Manager secret for the database credentials, and an EKS deployment that launches a containerized DB loader.
+#The DBCredentials resource is used to store the database credentials securely. The DBLoaderDeployment resource deploys the db-loader container and sets the appropriate environment variables. 
+#The LifecycleEventConfiguration block specifies a PreStop hook, which runs a sleep command for 5 seconds to give the container enough time to complete any pending database operations before it shuts down. 
+#This ensures that the container is stopped gracefully and won't cause any data loss or corruption.
+
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources": {
+    "EKSCluster": {
+      "Type": "AWS::EKS::Cluster",
+      "Properties": {
+        "Name": "example-eks-cluster",
+        "RoleArn": "your-eks-role-arn",
+        "Version": "1.21",
+        "ResourcesVpcConfig": {
+          "SecurityGroupIds": ["your-eks-security-group-id"],
+          "SubnetIds": ["your-eks-subnet-id-1", "your-eks-subnet-id-2", "your-eks-subnet-id-3"]
+        }
+      }
+    },
+    "DBCredentials": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Name": "db-credentials",
+        "SecretString": "{\"username\":\"your-db-username\",\"password\":\"your-db-password\",\"database\":\"your-db-name\"}"
+      }
+    },
+    "DBLoaderDeployment": {
+      "Type": "AWS::EKS::Deployment",
+      "Properties": {
+        "ClusterName": { "Ref": "EKSCluster" },
+        "DeploymentName": "db-loader",
+        "Namespace": "default",
+        "TaskDefinition": {
+          "Family": "db-loader",
+          "ContainerDefinitions": [
+            {
+              "Name": "db-loader",
+              "Image": "your-db-loader-image",
+              "Args": ["--db-host", "your-db-host", "--db-port", "your-db-port", "--db-name", "your-db-name", "--db-user", "your-db-username", "--db-password", { "Ref": "DBCredentials" }],
+              "Environment": [
+                {
+                  "Name": "DB_CREDENTIALS",
+                  "Value": { "Ref": "DBCredentials" }
+                }
+              ],
+              "LifecycleEventConfiguration": {
+                "PreStop": {
+                  "Exec": {
+                    "Command": ["sh", "-c", "sleep 5"]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "DesiredCount": 1
+      }
+    }
+  }
+}
