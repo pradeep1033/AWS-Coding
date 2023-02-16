@@ -1,0 +1,46 @@
+import boto3
+import os
+import mimetypes
+
+# returns a list of the files in the branch or commit
+def get_blob_list(codecommit, repository, afterCommitSpecifier, beforeCommitSpecifier=None, lastCommitSpecifier=None):
+    args = {'repositoryName': repository, 'afterCommitSpecifier': afterCommitSpecifier}
+
+    if beforeCommitSpecifier:
+        args['beforeCommitSpecifier'] = beforeCommitSpecifier
+    if lastCommitSpecifier:
+        args['afterCommitSpecifier'] = lastCommitSpecifier
+
+    response = codecommit.get_differences(**args)
+
+    blob_list = [difference['afterBlob'] for difference in response['differences']]
+
+    while 'NextToken' in response:
+        args['NextToken'] = response['NextToken']
+        response = codecommit.get_differences(**args)
+        blob_list += [difference['afterBlob'] for difference in response['differences']]
+
+    return blob_list
+
+def lambda_handler(event, context):
+    # target bucket
+    bucket = boto3.resource('s3').Bucket(os.environ['s3BucketName'])
+    # source codecommit
+    codecommit = boto3.client('codecommit', region_name=os.environ['codecommitRegion'])
+    repository_name = os.environ['repository']
+    last_commit_id = event['detail']['commitId']
+    folder_path = os.environ['s3FolderPath'] # The S3 folder path
+    for blob in get_blob_list(codecommit, repository_name, os.environ['branch'], lastCommitSpecifier=last_commit_id):
+        path = blob['path']
+        content = (codecommit.get_blob(repositoryName=repository_name, blobId=blob['blobId']))['content']
+        content_type = mimetypes.guess_type(path)[0]
+        key = f"{folder_path}/{path}" if folder_path else path
+        if content_type is not None:
+            bucket.put_object(Body=content, Key=key, ContentType=content_type)
+        else:
+            bucket.put_object(Body=content, Key=key)
+            
+ #Note that you will need to set the environment variables s3BucketName, codecommitRegion, repository, and branch as before. Also, 
+ #this code assumes that the function is triggered by a CodeCommit event, which includes a commitId in the event parameter
+ #Here, we have added a new environment variable s3FolderPath that specifies the S3 folder path. If this variable is set,
+ #we prepend it to the path variable when constructing the key for bucket.put_object().If s3FolderPath is not set, we just use the path variable as the key.
