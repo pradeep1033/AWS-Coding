@@ -2,30 +2,24 @@ import boto3
 import os
 import mimetypes
 
-# returns a list of the files in the branch or commit
-def get_blob_list(codecommit, repository, afterCommitSpecifier, beforeCommitSpecifier=None):
-    args = {'repositoryName': repository, 'afterCommitSpecifier': afterCommitSpecifier}
+# Returns a list of the files changed in the commit
+def get_blob_list(codecommit, repository, commit_id):
+    response = codecommit.get_commit(repositoryName=repository, commitId=commit_id)
 
-    if beforeCommitSpecifier:
-        args['beforeCommitSpecifier'] = beforeCommitSpecifier
-
-    response = codecommit.get_differences(**args)
-
-    blob_list = [difference['afterBlob'] for difference in response['differences']]
+    blob_list = [obj for obj in response['commit']['treeId']]
 
     while 'NextToken' in response:
-        args['NextToken'] = response['NextToken']
-        response = codecommit.get_differences(**args)
-        blob_list += [difference['afterBlob'] for difference in response['differences']]
+        response = codecommit.get_commit(repositoryName=repository, commitId=commit_id, nextToken=response['NextToken'])
+        blob_list += [obj for obj in response['commit']['treeId']]
 
     return blob_list
 
-# lambda-function
-# triggered by changes in a codecommit repository
-# reads files in the repository and uploads them to s3-bucket
+# Lambda function triggered by changes in a CodeCommit repository
+# Reads files in the repository and uploads them to an S3 bucket
 #
 # ENVIRONMENT VARIABLES:
 #     s3BucketName
+#     s3FolderPath
 #     codecommitRegion
 #     repository
 #     branch
@@ -34,27 +28,29 @@ def get_blob_list(codecommit, repository, afterCommitSpecifier, beforeCommitSpec
 #
 # EXECUTION ROLE
 #     lambda-codecommit-s3-execution-role (permissions: AWSCodeCommitReadOnly, AWSLambdaExecute)
-#
 def lambda_handler(event, context):
-    print(event)
-    s3_client = boto3.client('s3')
-    s3_bucket_name = os.environ['s3BucketName']
-    codecommit_client = boto3.client('codecommit', region_name=os.environ['codecommitRegion'])
-    repository_name = os.environ['repository']
-    branch_name = os.environ['branch']
-
-    last_commit_id = event['detail']['commitId']
-    response = codecommit_client.get_commit(
-        repositoryName=repository_name,
-        commitId=last_commit_id
-    )
-    after_commit_id = response['commit']['treeId']
+    # Get the S3 bucket and CodeCommit client
+    bucket = boto3.resource('s3').Bucket(os.environ['s3BucketName'])
+    codecommit = boto3.client('codecommit', region_name=os.environ['codecommitRegion'])
     
-    for blob in get_blob_list(codecommit_client, repository_name, after_commit_id, last_commit_id):
-        path = os.path.join(os.environ['s3Folder'], blob['path'])
-        content = (codecommit_client.get_blob(repositoryName=repository_name, blobId=blob['blobId']))['content']
+    # Get the last commit id from the CodeCommit event
+    last_commit_id = event['Records'][0]['codecommit']['references'][0]['commit']
+    print(f"Last commit id: {last_commit_id}")
+    
+    # Get the list of files changed in the last commit
+    blob_list = get_blob_list(codecommit, os.environ['repository'], last_commit_id)
+    print(f"Files to upload: {blob_list}")
+    
+    # Upload each file to the specified S3 folder
+    for blob in blob_list:
+        path = os.path.join(os.environ['s3FolderPath'], blob['path'])
+        content = (codecommit.get_blob(repositoryName=os.environ['repository'], blobId=blob['blobId']))['content']
+
+        # Guess the mime content-type of the files and provide it to S3 since S3 cannot do this on its own
         content_type = mimetypes.guess_type(path)[0]
         if content_type is not None:
-            s3_client.put_object(Body=(content), Bucket=s3_bucket_name, Key=path, ContentType=content_type)
+            bucket.put_object(Body=content, Key=path, ContentType=content_type)
         else:
-            s3_client.put_object(Body=(content), Bucket=s3_bucket_name, Key=path)
+            bucket.put_object(Body=content, Key=path)
+            
+    print("Files uploaded successfully to S3.")
