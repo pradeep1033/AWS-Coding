@@ -6,13 +6,18 @@ import mimetypes
 def get_blob_list(codecommit, repository, commit_id):
     response = codecommit.get_commit(repositoryName=repository, commitId=commit_id)
 
-    blob_list = [obj for obj in response['commit']['treeId']]
+    blob_list = [{'blobId': obj, 'path': ''} for obj in response['commit']['treeId']]
 
     while 'NextToken' in response:
         response = codecommit.get_commit(repositoryName=repository, commitId=commit_id, nextToken=response['NextToken'])
-        blob_list += [obj for obj in response['commit']['treeId']]
+        blob_list += [{'blobId': obj, 'path': ''} for obj in response['commit']['treeId']]
+
+    for blob in blob_list:
+        obj = codecommit.get_object(repositoryName=repository, objectId=blob['blobId'])
+        blob['path'] = obj['path']
 
     return blob_list
+
 
 # Lambda function triggered by changes in a CodeCommit repository
 # Reads files in the repository and uploads them to an S3 bucket
