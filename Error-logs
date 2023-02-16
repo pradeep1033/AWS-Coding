@@ -1,0 +1,8 @@
+{
+  "errorMessage": "'detail'",
+  "errorType": "KeyError",
+  "requestId": "2c85e301-667d-4779-97ea-ef44e0de8a85",
+  "stackTrace": [
+    "  File \"/var/task/lambda_function.py\", line 31, in lambda_handler\n    last_commit_id = event['detail']['commitId']\n"
+  ]
+}
