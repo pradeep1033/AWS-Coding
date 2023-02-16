@@ -3,7 +3,7 @@ import os
 import mimetypes
 
 # Returns a list of the files changed in the commit
-def get_blob_list(codecommit, repository, commit_id):
+def get_blob_list(codecommit, s3, repository, commit_id):
     response = codecommit.get_commit(repositoryName=repository, commitId=commit_id)
 
     blob_list = [{'blobId': obj, 'path': ''} for obj in response['commit']['treeId']]
@@ -13,10 +13,11 @@ def get_blob_list(codecommit, repository, commit_id):
         blob_list += [{'blobId': obj, 'path': ''} for obj in response['commit']['treeId']]
 
     for blob in blob_list:
-        obj = codecommit.get_object(repositoryName=repository, objectId=blob['blobId'])
-        blob['path'] = obj['path']
+        obj = s3.get_object(Bucket=os.environ['s3BucketName'], Key=blob['blobId'])
+        blob['path'] = obj['Metadata'].get('path', '')
 
     return blob_list
+
 
 
 # Lambda function triggered by changes in a CodeCommit repository
@@ -34,7 +35,8 @@ def get_blob_list(codecommit, repository, commit_id):
 # EXECUTION ROLE
 #     lambda-codecommit-s3-execution-role (permissions: AWSCodeCommitReadOnly, AWSLambdaExecute)
 def lambda_handler(event, context):
-    # Get the S3 bucket and CodeCommit client
+    # Get the S3 bucket, CodeCommit, and S3 client
+    s3 = boto3.client('s3')
     bucket = boto3.resource('s3').Bucket(os.environ['s3BucketName'])
     codecommit = boto3.client('codecommit', region_name=os.environ['codecommitRegion'])
     
@@ -43,14 +45,14 @@ def lambda_handler(event, context):
     print(f"Last commit id: {last_commit_id}")
     
     # Get the list of files changed in the last commit
-    blob_list = get_blob_list(codecommit, os.environ['repository'], last_commit_id)
+    blob_list = get_blob_list(codecommit, s3, os.environ['repository'], last_commit_id)
     print(f"Files to upload: {blob_list}")
     
     # Upload each file to the specified S3 folder
     for blob in blob_list:
         print(f"Blob: {blob}")
         path = os.path.join(os.environ['s3FolderPath'], blob['path'])
-        content = (codecommit.get_blob(repositoryName=os.environ['repository'], blobId=blob['blobId']))['content']
+        content = s3.get_object(Bucket=os.environ['s3BucketName'], Key=blob['blobId'])['Body'].read()
 
         # Guess the mime content-type of the files and provide it to S3 since S3 cannot do this on its own
         content_type = mimetypes.guess_type(path)[0]
