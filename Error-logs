@@ -5,3 +5,38 @@ Traceback (most recent call last):
 
 
 event {'Records': [{'awsRegion': 'ap-south-1', 'codecommit': {'references': [{'commit': '2fb2f2c65245e2d4505881e1691e525cfb5e8709', 'ref': 'refs/heads/master'}]}, 'customData': None, 'eventId': '4307be1b-546e-473c-b041-2eb04fa7318c', 'eventName': 'ReferenceChanges', 'eventPartNumber': 1, 'eventSource': 'aws:codecommit', 'eventSourceARN': 'arn:aws:codecommit:ap-south-1:728675747238:test-cicd', 'eventTime': '2023-02-16T06:25:55.077+0000', 'eventTotalParts': 1, 'eventTriggerConfigId': '28e57893-23d6-4f25-87c4-0b49059609c6', 'eventTriggerName': 'test', 'eventVersion': '1.0', 'userIdentityARN': 'arn:aws:iam::728675747238:user/p.shukla1@tcs.com'}]}
+-----------------
+
+import os
+import boto3
+import json
+
+def lambda_handler(event, context):
+    # Get the S3 client
+    s3 = boto3.client('s3')
+    
+    # Get the bucket name from environment variable
+    bucket_name = os.environ['bucketName']
+    
+    # Get the s3 folder path from environment variable
+    folder_path = os.environ['s3FolderPath']
+
+    # Get the last commit ID from the CodeCommit event
+    last_commit_id = event['Records'][0]['codecommit']['references'][0]['commit']
+
+    # Get the diff between the last two commits
+    response = s3.list_objects_v2(Bucket=bucket_name, Prefix=folder_path)
+    existing_keys = [obj['Key'] for obj in response.get('Contents', [])]
+    diff = s3.get_object(Bucket=bucket_name, Key=f"{folder_path}/{last_commit_id}.diff")['Body'].read().decode()
+    blobs = diff.split('diff --git ')[1:]
+    for blob in blobs:
+        blob = blob.splitlines()[0].split()
+        if blob[0] != 'a': # Skip files that are being deleted
+            print("Blob: ", blob)
+            path = os.path.join(folder_path, blob['path']) # Combine the folder path and file path
+            if path not in existing_keys:
+                s3.upload_file(Filename=blob['path'], Bucket=bucket_name, Key=path)
+    return {
+        'statusCode': 200,
+        'body': json.dumps('S3 Upload Complete')
+    }
