@@ -2,3 +2,6 @@
 Traceback (most recent call last):
   File "/var/task/lambda_function.py", line 46, in lambda_handler
     path = os.path.join(os.environ['s3FolderPath'], blob['path'])
+
+
+event {'Records': [{'awsRegion': 'ap-south-1', 'codecommit': {'references': [{'commit': '2fb2f2c65245e2d4505881e1691e525cfb5e8709', 'ref': 'refs/heads/master'}]}, 'customData': None, 'eventId': '4307be1b-546e-473c-b041-2eb04fa7318c', 'eventName': 'ReferenceChanges', 'eventPartNumber': 1, 'eventSource': 'aws:codecommit', 'eventSourceARN': 'arn:aws:codecommit:ap-south-1:728675747238:test-cicd', 'eventTime': '2023-02-16T06:25:55.077+0000', 'eventTotalParts': 1, 'eventTriggerConfigId': '28e57893-23d6-4f25-87c4-0b49059609c6', 'eventTriggerName': 'test', 'eventVersion': '1.0', 'userIdentityARN': 'arn:aws:iam::728675747238:user/p.shukla1@tcs.com'}]}
