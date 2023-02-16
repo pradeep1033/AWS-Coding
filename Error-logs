@@ -11,6 +11,18 @@ Traceback (most recent call last):
     obj = codecommit.get_object(repositoryName=repository, objectId=blob['blobId'])
   File "/var/runtime/botocore/client.py", line 657, in __getattr__
     raise AttributeError(
+    
+    
+[ERROR] NoSuchKey: An error occurred (NoSuchKey) when calling the GetObject operation: The specified key does not exist.
+Traceback (most recent call last):
+  File "/var/task/lambda_function.py", line 48, in lambda_handler
+    blob_list = get_blob_list(codecommit, s3, os.environ['repository'], last_commit_id)
+  File "/var/task/lambda_function.py", line 16, in get_blob_list
+    obj = s3.get_object(Bucket=os.environ['s3BucketName'], Key=blob['blobId'])
+  File "/var/runtime/botocore/client.py", line 391, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+  File "/var/runtime/botocore/client.py", line 719, in _make_api_call
+    raise error_class(parsed_response, operation_name)
 
 
 event {'Records': [{'awsRegion': 'ap-south-1', 'codecommit': {'references': [{'commit': '2fb2f2c65245e2d4505881e1691e525cfb5e8709', 'ref': 'refs/heads/master'}]}, 'customData': None, 'eventId': '4307be1b-546e-473c-b041-2eb04fa7318c', 'eventName': 'ReferenceChanges', 'eventPartNumber': 1, 'eventSource': 'aws:codecommit', 'eventSourceARN': 'arn:aws:codecommit:ap-south-1:728675747238:test-cicd', 'eventTime': '2023-02-16T06:25:55.077+0000', 'eventTotalParts': 1, 'eventTriggerConfigId': '28e57893-23d6-4f25-87c4-0b49059609c6', 'eventTriggerName': 'test', 'eventVersion': '1.0', 'userIdentityARN': 'arn:aws:iam::728675747238:user/p.shukla1@tcs.com'}]}
