@@ -54,3 +54,5 @@ def lambda_handler(event, context):
             bucket.put_object(Body=content, Key=path)
             
     print("Files uploaded successfully to S3.")
+
+#Make sure to add the environment variable s3FolderPath with the folder path in the S3 bucket where you want to upload the files.
