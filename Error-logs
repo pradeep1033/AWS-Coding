@@ -6,3 +6,11 @@
     "  File \"/var/task/lambda_function.py\", line 31, in lambda_handler\n    last_commit_id = event['detail']['commitId']\n"
   ]
 }
+
+
+START RequestId: 9236657b-79da-4149-81d2-37364e3ca904 Version: $LATEST
+{'key1': 'value1', 'key2': 'value2', 'key3': 'value3'}
+[ERROR] KeyError: 'detail'
+Traceback (most recent call last):
+  File "/var/task/lambda_function.py", line 46, in lambda_handler
+    last_commit_id = event['detail']['commitId']END RequestId: 9236657b-79da-4149-81d2-37364e3ca904
