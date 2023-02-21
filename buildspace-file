@@ -6,18 +6,11 @@ phases:
       python: 3.8
   build:
     commands:
-      # Clone the CodeCommit repository
-      git clone <codecommit_repo_url>
-      cd <codecommit_repo_name>
+      - git clone <codecommit_repo_url>
+      - cd <codecommit_repo_name>
+      - filename=$(git diff-tree --no-commit-id --name-only -r HEAD | grep '.py$' | head -1)
+      - aws s3 sync "$(dirname "$filename")" s3://<s3_bucket_name>/<folder_path>/
 
-      # Get the name of the most recently committed Python script file
-      filename=$(git diff-tree --no-commit-id --name-only -r HEAD | grep '.py$' | head -1)
-
-      # Upload the Python script file to a folder path in S3
-      aws s3 sync "$(dirname "$filename")" s3://<s3_bucket_name>/<folder_path>/
-      
-      All mapping items must start at the same column at line 14, column 1
-Implicit map keys need to be followed by map values at line 14, column 7
 ===========================================================================================================================================
 version: 0.2
 
