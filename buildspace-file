@@ -54,7 +54,15 @@ phases:
       - snowsql -a <account_name> -u <user_name> -w <warehouse_name> -r <role_name> -s <schema_name> -f codecommit-repo/<path_to_sql_script>.sql
       
       
-      
+  
+  Container] 2023/02/22 10:14:15 Running command bash snowsql-1.2.6-linux_x86_64.bash
+snowsql-1.2.6-linux_x86_64.bash: line 1: syntax error near unexpected token `newline'
+snowsql-1.2.6-linux_x86_64.bash: line 1: `<?xml version="1.0" encoding="UTF-8"?>'
+
+[Container] 2023/02/22 10:14:15 Command did not exit successfully bash snowsql-1.2.6-linux_x86_64.bash exit status 2
+[Container] 2023/02/22 10:14:15 Phase complete: INSTALL State: FAILED
+[Container] 2023/02/22 10:14:15 Phase context status code: COMMAND_EXECUTION_ERROR Message: Error while executing command: bash snowsql-1.2.6-linux_x86_64.bash. Reason: exit status 2
+  
 What are your Supervisors’ Strengths?
 
 1- Very good communication skills, As a supervisor he communicates processes, expectations of the customer, and goals to our team.
