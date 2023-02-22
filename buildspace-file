@@ -14,6 +14,8 @@ phases:
       - aws s3 sync "$(dirname "$filename")" s3://test-cicd/<glue-code/
 
 COMMAND_EXECUTION_ERROR: Error while executing command: aws s3 sync "$(dirname "$filename")" s3://cbb-copy-teco-masterdata/test/. Reason: exit status 1
+- aws s3 sync --debug "$(dirname "$filename")" s3://test-cicd/<glue-code/>
+
 -----------------------------------------------------------
 version: 0.2
 phases:
