@@ -49,3 +49,11 @@ phases:
 
       # Execute SQL script
       - snowsql -a <account_name> -u <user_name> -w <warehouse_name> -r <role_name> -s <schema_name> -f codecommit-repo/<path_to_sql_script>.sql
+      
+      
+      
+      What are your Supervisors’ Strengths?
+      What are your Supervisors’ Areas of Improvements?
+      What action would you want your Supervisor to start doing?
+      What action would you want your Supervisor to stop doing?
+      What action would you want your Supervisor to continue doing?
