@@ -73,6 +73,8 @@ phases:
       # Install SnowSQL
       - curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash
       - bash snowsql-1.2.24-linux_x86_64.bash
+      # Edit SnowSQL configuration file and add Snowflake user's username and password
+      - echo -e '[connections]\naccountname = ll95421\nusername = tecodpp_dev_user\npassword = <replace_with_password>\n' >> ~/.snowsql/config
 
   build:
     commands:
@@ -80,6 +82,4 @@ phases:
       - git clone https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/snowflake-test codecommit-repo
 
       # Execute SQL script
-      - snowsql -a ll95421.ap-south-1.aws.snowflakecomputing.com -u tecodpp_dev_user -w ppg_teco_dpp_wh -r tecodpp_dev_role -s test_sc1 -f codecommit-repo/sql_script.sql
-      
-      
+      - snowsql -a ll95421.ap-south-1.aws.snowflakecomputing.com -w ppg_teco_dpp_wh -r tecodpp_dev_role -s test_sc1 -f codecommit-repo/sql_script.sql
