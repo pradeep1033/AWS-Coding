@@ -206,3 +206,14 @@ phases:
       # Execute SQL script
       - snowsql -a ll95421.ap-south-1.aws.snowflakecomputing.com -s test_sc1 -f codecommit-repo/sql_script.sql
 
+
+
+[Container] 2023/03/07 10:09:28 Running command snowsql -a ll95421.ap-south-1.aws.snowflakecomputing.com -w ppg_teco_dpp_wh -r tecodpp_dev_role -s test_sc1 -f codecommit-repo/sql_script.sql
+/codebuild/output/tmp/script.sh: line 4: snowsql: command not found
+
+[Container] 2023/03/07 10:09:28 Command did not exit successfully snowsql -a ll95421.ap-south-1.aws.snowflakecomputing.com -w ppg_teco_dpp_wh -r tecodpp_dev_role -s test_sc1 -f codecommit-repo/sql_script.sql exit status 127
+[Container] 2023/03/07 10:09:28 Phase complete: BUILD State: FAILED
+[Container] 2023/03/07 10:09:28 Phase context status code: COMMAND_EXECUTION_ERROR Message: Error while executing command: snowsql -a ll95421.ap-south-1.aws.snowflakecomputing.com -w ppg_teco_dpp_wh -r tecodpp_dev_role -s test_sc1 -f codecommit-repo/sql_script.sql. Reason: exit status 127
+[Container] 2023/03/07 10:09:28 Entering phase POST_BUILD
+[Container] 2023/03/07 10:09:28 Phase complete: POST_BUILD State: SUCCEEDED
+[Container] 2023/03/07 10:09:28 Phase context status code:  Message: 
