@@ -251,3 +251,8 @@ phases:
       # Execute SQL script
       - snowsql -a ll95421.ap-south-1.aws.snowflakecomputing.com -w ppg_teco_dpp_wh -r tecodpp_dev_role -s test_sc1 -f codecommit-repo/sql_script.sql
 
+This is because that directory /home/ec2-user/bin is not included in your PATH.
+
+So modify your .bash_profile and add the line
+
+export PATH=/home/ec2-user/bin:$PATH
