@@ -256,3 +256,39 @@ This is because that directory /home/ec2-user/bin is not included in your PATH.
 So modify your .bash_profile and add the line
 
 export PATH=/home/ec2-user/bin:$PATH
+
+------------------------------
+v-6
+
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+      - git config --global credential.helper '!aws codecommit credential-helper $@'
+      - git config --global credential.UseHttpPath true
+      - curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash
+      - chmod +x snowsql-1.2.24-linux_x86_64.bash
+      # Create .bashrc and .bash_profile files if they don't exist
+      - touch ~/.bashrc
+      - touch ~/.bash_profile
+      # Add SnowSQL path to .bash_profile
+      - printf 'export PATH=/home/ec2-user/bin:$PATH' >> ~/.bash_profile
+      - SNOWSQL_DEST=~/bin SNOWSQL_LOGIN_SHELL=~/.bashrc bash snowsql-1.2.24-linux_x86_64.bash
+      - mkdir -p ~/.snowsql
+      - printf "[connections]\n" >> ~/.snowsql/config
+      - printf "accountname = LL95421\n" >> ~/.snowsql/config
+      - printf "region = ap-south-1.aws\n" >> ~/.snowsql/config
+      - printf "username = tecodpp_dev_user\n" >> ~/.snowsql/config
+      - printf "password = snowdevPolicy@1\n" >> ~/.snowsql/config
+      - sed -i 's/log_file = .*/log_file = ~\/.snowsql_rt.log/g' ~/.snowsql/config
+  build:
+    commands:
+      # Clone CodeCommit repository
+      - git clone https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/snowflake-test codecommit-repo
+
+      # Execute SQL script
+      - snowsql -a ll95421.ap-south-1.aws.snowflakecomputing.com -s test_sc1 -f codecommit-repo/sql_script.sql
+
