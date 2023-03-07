@@ -46,7 +46,7 @@ def lambda_handler(event, context):
         'body': json.dumps('S3 Upload Complete')
     }
 ---------------------------------------------------------
-
+v-1
 version: 0.2
 
 phases:
@@ -68,7 +68,7 @@ phases:
       # Execute SQL script
       - snowsql -a ll95421.ap-south-1.aws.snowflakecomputing.com -w ppg_teco_dpp_wh -r tecodpp_dev_role -s test_sc1 -f codecommit-repo/sql_script.sql
       =========================================================================
-      version: 0.2
+v-2
 
 phases:
   install:
@@ -98,7 +98,34 @@ Replace <your_account_name>, <your_username>, and <your_password> with the appro
 This buildspec installs SnowSQL and sets up a ~/.snowsql/config file with the connection information for your Snowflake account. 
 The snowsql command in the build phase can then reference the configuration information to execute SQL scripts against your Snowflake account.
 
+=======================================================
+v-3
+version: 0.2
 
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+      - curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash
+      - chmod +x snowsql-1.2.24-linux_x86_64.bash
+      # Create .bashrc file if it doesn't exist
+      - touch ~/.bashrc
+      - SNOWSQL_DEST=~/bin SNOWSQL_LOGIN_SHELL=~/.bashrc bash snowsql-1.2.24-linux_x86_64.bash
+      - mkdir -p ~/.snowsql
+      - printf "[connections]\n" >> ~/.snowsql/config
+      - printf "accountname = <your_account_name>\n" >> ~/.snowsql/config
+      - printf "username = <your_username>\n" >> ~/.snowsql/config
+      - printf "password = <your_password>\n" >> ~/.snowsql/config
+
+  build:
+    commands:
+      # Clone CodeCommit repository
+      - git clone https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/snowflake-test codecommit-repo
+
+      # Execute SQL script
+      - snowsql -a ll95421.ap-south-1.aws.snowflakecomputing.com -s test_sc1 -f codecommit-repo/sql_script.sql
+      - snowsql -a ll95421.ap-south-1.aws.snowflakecomputing.com -w ppg_teco_dpp_wh -r tecodpp_dev_role -s test_sc1 -f codecommit-repo/sql_script.sql
 
 
 
