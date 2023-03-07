@@ -1,50 +1,3 @@
-[Container] 2023/03/07 06:03:36 Running command SNOWSQL_DEST=~/bin SNOWSQL_LOGIN_SHELL=~/.bashrc bash snowsql-1.2.24-linux_x86_64.bash
-**********************************************************************
- Installing SnowSQL, Snowflake CLI.
-**********************************************************************
-
-The login shell script doesn't exist: /root/.bashrc
-
-[Container] 2023/03/07 06:03:36 Command did not exit successfully SNOWSQL_DEST=~/bin SNOWSQL_LOGIN_SHELL=~/.bashrc bash snowsql-1.2.24-linux_x86_64.bash exit status 1
-[Container] 2023/03/07 06:03:36 Phase complete: INSTALL State: FAILED
-[Container] 2023/03/07 06:03:36 Phase context status code: COMMAND_EXECUTION_ERROR Message: Error while executing command: SNOWSQL_DEST=~/bin SNOWSQL_LOGIN_SHELL=~/.bashrc bash snowsql-1.2.24-linux_x86_64.bash. Reason: exit status 1
-
-event {'Records': [{'awsRegion': 'ap-south-1', 'codecommit': {'references': [{'commit': '2fb2f2c65245e2d4505881e1691e525cfb5e8709', 'ref': 'refs/heads/master'}]}, 'customData': None, 'eventId': '4307be1b-546e-473c-b041-2eb04fa7318c', 'eventName': 'ReferenceChanges', 'eventPartNumber': 1, 'eventSource': 'aws:codecommit', 'eventSourceARN': 'arn:aws:codecommit:ap-south-1:728675747238:test-cicd', 'eventTime': '2023-02-16T06:25:55.077+0000', 'eventTotalParts': 1, 'eventTriggerConfigId': '28e57893-23d6-4f25-87c4-0b49059609c6', 'eventTriggerName': 'test', 'eventVersion': '1.0', 'userIdentityARN': 'arn:aws:iam::728675747238:user/p.shukla1@tcs.com'}]}
------------------
-
-import os
-import boto3
-import json
-
-def lambda_handler(event, context):
-    # Get the S3 client
-    s3 = boto3.client('s3')
-    
-    # Get the bucket name from environment variable
-    bucket_name = os.environ['bucketName']
-    
-    # Get the s3 folder path from environment variable
-    folder_path = os.environ['s3FolderPath']
-
-    # Get the last commit ID from the CodeCommit event
-    last_commit_id = event['Records'][0]['codecommit']['references'][0]['commit']
-
-    # Get the diff between the last two commits
-    response = s3.list_objects_v2(Bucket=bucket_name, Prefix=folder_path)
-    existing_keys = [obj['Key'] for obj in response.get('Contents', [])]
-    diff = s3.get_object(Bucket=bucket_name, Key=f"{folder_path}/{last_commit_id}.diff")['Body'].read().decode()
-    blobs = diff.split('diff --git ')[1:]
-    for blob in blobs:
-        blob = blob.splitlines()[0].split()
-        if blob[0] != 'a': # Skip files that are being deleted
-            print("Blob: ", blob)
-            path = os.path.join(folder_path, blob['path']) # Combine the folder path and file path
-            if path not in existing_keys:
-                s3.upload_file(Filename=blob['path'], Bucket=bucket_name, Key=path)
-    return {
-        'statusCode': 200,
-        'body': json.dumps('S3 Upload Complete')
-    }
 ---------------------------------------------------------
 v-1
 version: 0.2
@@ -107,6 +60,8 @@ phases:
     runtime-versions:
       python: 3.8
     commands:
+      - git config --global credential.helper '!aws codecommit credential-helper $@'
+      - git config --global credential.UseHttpPath true
       - curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash
       - chmod +x snowsql-1.2.24-linux_x86_64.bash
       # Create .bashrc file if it doesn't exist
@@ -114,10 +69,9 @@ phases:
       - SNOWSQL_DEST=~/bin SNOWSQL_LOGIN_SHELL=~/.bashrc bash snowsql-1.2.24-linux_x86_64.bash
       - mkdir -p ~/.snowsql
       - printf "[connections]\n" >> ~/.snowsql/config
-      - printf "accountname = <your_account_name>\n" >> ~/.snowsql/config
-      - printf "username = <your_username>\n" >> ~/.snowsql/config
-      - printf "password = <your_password>\n" >> ~/.snowsql/config
-
+      - printf "accountname = ll95421\n" >> ~/.snowsql/config
+      - printf "username = tecodpp_dev_user\n" >> ~/.snowsql/config
+      - printf "password = snowdevPolicy@1\n" >> ~/.snowsql/config
   build:
     commands:
       # Clone CodeCommit repository
@@ -125,7 +79,18 @@ phases:
 
       # Execute SQL script
       - snowsql -a ll95421.ap-south-1.aws.snowflakecomputing.com -s test_sc1 -f codecommit-repo/sql_script.sql
-      - snowsql -a ll95421.ap-south-1.aws.snowflakecomputing.com -w ppg_teco_dpp_wh -r tecodpp_dev_role -s test_sc1 -f codecommit-repo/sql_script.sql
+      
+  ----------------------------------------------------------------------------------------------------------------------------
+we need to open ~/.snowsql/config file and add 
+accountname = LL95421
+region = ap-south-1.aws
+username = tecodpp_dev_user
+password = snowdevPolicy@1
+
+also edit log file location in config file as 
+log_file = ~/.snowsql_rt.log
+
+below is the config file 
 
 
 
