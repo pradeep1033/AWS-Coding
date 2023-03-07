@@ -217,3 +217,37 @@ phases:
 [Container] 2023/03/07 10:09:28 Entering phase POST_BUILD
 [Container] 2023/03/07 10:09:28 Phase complete: POST_BUILD State: SUCCEEDED
 [Container] 2023/03/07 10:09:28 Phase context status code:  Message: 
+
+============================
+v-5
+
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+      - git config --global credential.helper '!aws codecommit credential-helper $@'
+      - git config --global credential.UseHttpPath true
+      - curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash
+      - chmod +x snowsql-1.2.24-linux_x86_64.bash
+      # Create .bashrc file if it doesn't exist
+      - touch ~/.bashrc
+      - SNOWSQL_DEST=~/bin SNOWSQL_LOGIN_SHELL=~/.bashrc bash snowsql-1.2.24-linux_x86_64.bash
+      - mkdir -p ~/.snowsql
+      - printf "[connections]\n" >> ~/.snowsql/config
+      - printf "accountname = LL95421\n" >> ~/.snowsql/config
+      - printf "region = ap-south-1.aws\n" >> ~/.snowsql/config
+      - printf "username = tecodpp_dev_user\n" >> ~/.snowsql/config
+      - printf "password = snowdevPolicy@1\n" >> ~/.snowsql/config
+      - sed -i 's/log_file = .*/log_file = ~\/.snowsql_rt.log/g' ~/.snowsql/config
+      - echo 'export PATH=~/bin:$PATH' >> ~/.bashrc
+  build:
+    commands:
+      # Clone CodeCommit repository
+      - git clone https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/snowflake-test codecommit-repo
+
+      # Execute SQL script
+      - snowsql -a ll95421.ap-south-1.aws.snowflakecomputing.com -w ppg_teco_dpp_wh -r tecodpp_dev_role -s test_sc1 -f codecommit-repo/sql_script.sql
+
