@@ -85,8 +85,14 @@ phases:
       - gpg --verify snowsql-1.2.24-linux_x86_64.bash.sig snowsql-1.2.24-linux_x86_64.bash
       # Install SnowSQL
       - ls -a
+      - pwd
       - mv snowsql-1.2.24-linux_x86_64.bash /root
       - mv sql_script.sql /root
+      - ls -a
+      - cd /root
+      - ls -a
+      - pwd
+      - cat > .profile
       - ls -a
       - export SNOWSQL_DEST=/root/bin
       - export SNOWSQL_LOGIN_SHELL=/root/.profile
@@ -105,11 +111,68 @@ phases:
       - mkdir /root/.snowsql
       - touch /root/.snowsql/config
       - snowsql -v
+
+
+-----------------------------------
+
       
-      
-      -----------------------------
-      
-      [Container] 2023/03/10 09:24:17 Running command ls -a
+Container] 2023/03/10 09:38:32 Waiting for agent ping
+[Container] 2023/03/10 09:38:33 Waiting for DOWNLOAD_SOURCE
+[Container] 2023/03/10 09:38:34 Phase is DOWNLOAD_SOURCE
+[Container] 2023/03/10 09:38:34 CODEBUILD_SRC_DIR=/codebuild/output/src282764098/src
+[Container] 2023/03/10 09:38:34 YAML location is /codebuild/output/src282764098/src/buildspec.yml
+[Container] 2023/03/10 09:38:34 Setting HTTP client timeout to higher timeout for S3 source
+[Container] 2023/03/10 09:38:34 Processing environment variables
+[Container] 2023/03/10 09:38:34 Selecting 'python' runtime version '3.8' based on manual selections...
+[Container] 2023/03/10 09:38:34 Running command echo "Installing Python version 3.8 ..."
+Installing Python version 3.8 ...
+
+[Container] 2023/03/10 09:38:34 Running command pyenv global  $PYTHON_38_VERSION
+
+[Container] 2023/03/10 09:38:37 Moving to directory /codebuild/output/src282764098/src
+[Container] 2023/03/10 09:38:37 Configuring ssm agent with target id: codebuild:d975609e-46a3-4948-b6f3-51cea9389adb
+[Container] 2023/03/10 09:38:37 Successfully updated ssm agent configuration
+[Container] 2023/03/10 09:38:37 Registering with agent
+[Container] 2023/03/10 09:38:37 Phases found in YAML: 2
+[Container] 2023/03/10 09:38:37  INSTALL: 24 commands
+[Container] 2023/03/10 09:38:37  POST_BUILD: 3 commands
+[Container] 2023/03/10 09:38:37 Phase complete: DOWNLOAD_SOURCE State: SUCCEEDED
+[Container] 2023/03/10 09:38:37 Phase context status code:  Message: 
+[Container] 2023/03/10 09:38:37 Entering phase INSTALL
+[Container] 2023/03/10 09:38:37 Running command curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 42.0M  100 42.0M    0     0   178M      0 --:--:-- --:--:-- --:--:--  178M
+
+[Container] 2023/03/10 09:38:39 Running command curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash.sig
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   543  100   543    0     0   2543      0 --:--:-- --:--:-- --:--:--  2549
+
+[Container] 2023/03/10 09:38:39 Running command gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 630D9F3CAB551AF3
+gpg: directory `/root/.gnupg' created
+gpg: new configuration file `/root/.gnupg/gpg.conf' created
+gpg: WARNING: options in `/root/.gnupg/gpg.conf' are not yet active during this run
+gpg: keyring `/root/.gnupg/secring.gpg' created
+gpg: keyring `/root/.gnupg/pubring.gpg' created
+gpg: requesting key AB551AF3 from hkp server keyserver.ubuntu.com
+gpg: /root/.gnupg/trustdb.gpg: trustdb created
+gpg: key AB551AF3: public key "Snowflake Computing (Snowflake Computing Gpg Key) <snowflake_gpg@snowflake.net>" imported
+gpg: Total number processed: 1
+gpg:               imported: 1  (RSA: 1)
+
+[Container] 2023/03/10 09:38:40 Running command gpg --verify snowsql-1.2.24-linux_x86_64.bash.sig snowsql-1.2.24-linux_x86_64.bash
+gpg: Signature made Thu Oct 20 18:31:13 2022 UTC using RSA key ID AB551AF3
+gpg: Good signature from "Snowflake Computing (Snowflake Computing Gpg Key) <snowflake_gpg@snowflake.net>"
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: 23D8 08A5 B09A 9CB3 4610  C0B2 630D 9F3C AB55 1AF3
+
+[Container] 2023/03/10 09:38:40 Running command ls -a
 .
 ..
 buildspec.yml
@@ -117,23 +180,137 @@ snowsql-1.2.24-linux_x86_64.bash
 snowsql-1.2.24-linux_x86_64.bash.sig
 sql_script.sql
 
-[Container] 2023/03/10 09:24:17 Running command mv snowsql-1.2.24-linux_x86_64.bash /root
+[Container] 2023/03/10 09:38:40 Running command pwd
+/codebuild/output/src282764098/src
 
-[Container] 2023/03/10 09:24:17 Running command mv sql_script.sql /root
+[Container] 2023/03/10 09:38:40 Running command mv snowsql-1.2.24-linux_x86_64.bash /root
 
-[Container] 2023/03/10 09:24:17 Running command ls -a
+[Container] 2023/03/10 09:38:40 Running command mv sql_script.sql /root
+
+[Container] 2023/03/10 09:38:40 Running command ls -a
 .
 ..
 buildspec.yml
 snowsql-1.2.24-linux_x86_64.bash.sig
 
-[Container] 2023/03/10 09:24:17 Running command export SNOWSQL_DEST=/root/bin
+[Container] 2023/03/10 09:38:40 Running command cd /root
 
-[Container] 2023/03/10 09:24:17 Running command export SNOWSQL_LOGIN_SHELL=/root/.profile
+[Container] 2023/03/10 09:38:40 Running command ls -a
+.
+..
+.android
+.cache
+.config
+.dotnet
+.gitconfig
+.gnupg
+.goenv
+.gradle
+.local
+.m2
+.npm
+.nuget
+.phpenv
+.pyenv
+.rbenv
+.rnd
+.sbt
+.ssh
+.subversion
+.templateengine
+snowsql-1.2.24-linux_x86_64.bash
+sql_script.sql
 
-[Container] 2023/03/10 09:24:17 Running command bash snowsql-1.2.24-linux_x86_64.bash
-bash: snowsql-1.2.24-linux_x86_64.bash: No such file or directory
+[Container] 2023/03/10 09:38:40 Running command pwd
+/root
 
-[Container] 2023/03/10 09:24:17 Command did not exit successfully bash snowsql-1.2.24-linux_x86_64.bash exit status 127
-[Container] 2023/03/10 09:24:17 Phase complete: INSTALL State: FAILED
-[Container] 2023/03/10 09:24:17 Phase context status code: COMMAND_EXECUTION_ERROR Message: Error while executing command: bash snowsql-1.2.24-linux_x86_64.bash. Reason: exit status 127
+[Container] 2023/03/10 09:38:40 Running command cat > .profile
+
+[Container] 2023/03/10 09:38:40 Running command ls -a
+.
+..
+.android
+.cache
+.config
+.dotnet
+.gitconfig
+.gnupg
+.goenv
+.gradle
+.local
+.m2
+.npm
+.nuget
+.phpenv
+.profile
+.pyenv
+.rbenv
+.rnd
+.sbt
+.ssh
+.subversion
+.templateengine
+snowsql-1.2.24-linux_x86_64.bash
+sql_script.sql
+
+[Container] 2023/03/10 09:38:40 Running command export SNOWSQL_DEST=/root/bin
+
+[Container] 2023/03/10 09:38:40 Running command export SNOWSQL_LOGIN_SHELL=/root/.profile
+
+[Container] 2023/03/10 09:38:40 Running command bash snowsql-1.2.24-linux_x86_64.bash
+**********************************************************************
+ Installing SnowSQL, Snowflake CLI.
+**********************************************************************
+
+Updating /root/.profile to have /root/bin in PATH
+Open a new terminal session to make the updated PATH take effect.
+**********************************************************************
+ Congratulations! Follow the steps to connect to Snowflake DB.
+**********************************************************************
+
+1. Open a new terminal window.
+2. Execute the following command to test your connection:
+      snowsql -a <account_name> -u <login_name>
+
+      Enter your password when prompted. Enter !quit to quit the connection.
+
+3. Add your connection information to the ~/.snowsql/config file:
+      accountname = <account_name>
+                username = <login_name>
+                password = <password>
+
+4. Execute the following command to connect to Snowflake:
+
+      snowsql
+
+See the Snowflake documentation <https://docs.snowflake.net/manuals/user-guide/snowsql.html> for more information.
+
+[Container] 2023/03/10 09:38:41 Running command printf "[connections]\n" >> ~/.snowsql/config
+
+[Container] 2023/03/10 09:38:41 Running command printf "accountname = LL95421\n" >> ~/.snowsql/config
+
+[Container] 2023/03/10 09:38:41 Running command printf "region = ap-south-1.aws\n" >> ~/.snowsql/config
+
+[Container] 2023/03/10 09:38:41 Running command printf "username = tecodpp_dev_user\n" >> ~/.snowsql/config
+
+[Container] 2023/03/10 09:38:41 Running command printf "password = snowdevPolicy@1\n" >> ~/.snowsql/config
+
+[Container] 2023/03/10 09:38:41 Running command sed -i 's/log_file = .*/log_file = ~\/.snowsql_rt.log/g' ~/.snowsql/config
+
+[Container] 2023/03/10 09:38:41 Running command echo 'export PATH=~/bin:$PATH' >> ~/.bashrc
+
+[Container] 2023/03/10 09:38:41 Phase complete: INSTALL State: SUCCEEDED
+[Container] 2023/03/10 09:38:41 Phase context status code:  Message: 
+[Container] 2023/03/10 09:38:41 Entering phase PRE_BUILD
+[Container] 2023/03/10 09:38:41 Phase complete: PRE_BUILD State: SUCCEEDED
+[Container] 2023/03/10 09:38:41 Phase context status code:  Message: 
+[Container] 2023/03/10 09:38:41 Entering phase BUILD
+[Container] 2023/03/10 09:38:41 Phase complete: BUILD State: SUCCEEDED
+[Container] 2023/03/10 09:38:41 Phase context status code:  Message: 
+[Container] 2023/03/10 09:38:41 Entering phase POST_BUILD
+[Container] 2023/03/10 09:38:41 Running command mkdir /root/.snowsql
+mkdir: cannot create directory '/root/.snowsql': File exists
+
+[Container] 2023/03/10 09:38:41 Command did not exit successfully mkdir /root/.snowsql exit status 1
+[Container] 2023/03/10 09:38:41 Phase complete: POST_BUILD State: FAILED
+[Container] 2023/03/10 09:38:41 Phase context status code: COMMAND_EXECUTION_ERROR Message: Error while executing command: mkdir /root/.snowsql. Reason: exit status 1
