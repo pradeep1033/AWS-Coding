@@ -1,0 +1,71 @@
+Download the snowsql from AWS endpoint
+
+curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash
+
+Package Signature- Download from the keyserver
+
+gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 630D9F3CAB551AF3
+
+
+Download the GPG signature and verify the signature:
+
+# If you prefer to use curl to download the signature file, run this command:
+curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash.sig
+
+# Verify the package signature.
+gpg --verify snowsql-1.2.24-linux_x86_64.bash.sig snowsql-1.2.24-linux_x86_64.bash
+
+
+Installing SnowSQL Using the Installer
+
+SNOWSQL_DEST=~/bin SNOWSQL_LOGIN_SHELL=~/.profile bash snowsql-1.2.24-linux_x86_64.bash
+
+
+find /root .snowsql
+
+find /home/ec2-user .snowsql
+
+
+export PATH=/home/ec2-user/bin:$PATH - linux machine
+
+write in .profile file 
+export PATH=/root/bin:$PATH
+
+in environment image snowsql path 
+.snowsql/1.2.24/snowsql
+
+also in /root dir create .profile file 
+
+I want to install snowsql in to /root of the image 
+so full path will be /root/.snowsql/ and config path location is - /root/.snowsql/config
+
+
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+      - git config --global credential.helper '!aws codecommit credential-helper $@'
+      - git config --global credential.UseHttpPath true
+      - curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash
+      - chmod +x snowsql-1.2.24-linux_x86_64.bash
+      - mkdir /home/ec2-user/
+      - mv snowsql-1.2.24-linux_x86_64.bash /home/ec2-user/
+      - cd /home/ec2-user/
+      - ls
+      # Create .bashrc file if it doesn't exist
+      - touch ~/.bashrc
+      - SNOWSQL_DEST=~/bin SNOWSQL_LOGIN_SHELL=~/.bashrc bash snowsql-1.2.24-linux_x86_64.bash
+      - mkdir -p ~/.snowsql
+      - printf "[connections]\n" >> ~/.snowsql/config
+      - printf "accountname = LL95421\n" >> ~/.snowsql/config
+      - printf "region = ap-south-1.aws\n" >> ~/.snowsql/config
+      - printf "username = tecodpp_dev_user\n" >> ~/.snowsql/config
+      - printf "password = snowdevPolicy@1\n" >> ~/.snowsql/config
+      - sed -i 's/log_file = .*/log_file = ~\/.snowsql_rt.log/g' ~/.snowsql/config
+      - echo 'export PATH=~/bin:$PATH' >> ~/.bashrc
+      - pwd
+      - ls
+      - snowsql -v
