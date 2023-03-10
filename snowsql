@@ -78,15 +78,16 @@ phases:
     runtime-versions:
       python: 3.8
     commands:
-      # Install required packages
-      - sudo yum update -y
-      - sudo yum install -y curl gnupg2
       # Download and verify SnowSQL
       - curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash
       - curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash.sig
       - gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 630D9F3CAB551AF3
       - gpg --verify snowsql-1.2.24-linux_x86_64.bash.sig snowsql-1.2.24-linux_x86_64.bash
       # Install SnowSQL
+      - ls -a
+      - mv snowsql-1.2.24-linux_x86_64.bash /root
+      - mv sql_script.sql /root
+      - ls -a
       - export SNOWSQL_DEST=/root/bin
       - export SNOWSQL_LOGIN_SHELL=/root/.profile
       - bash snowsql-1.2.24-linux_x86_64.bash
@@ -104,3 +105,35 @@ phases:
       - mkdir /root/.snowsql
       - touch /root/.snowsql/config
       - snowsql -v
+      
+      
+      -----------------------------
+      
+      [Container] 2023/03/10 09:24:17 Running command ls -a
+.
+..
+buildspec.yml
+snowsql-1.2.24-linux_x86_64.bash
+snowsql-1.2.24-linux_x86_64.bash.sig
+sql_script.sql
+
+[Container] 2023/03/10 09:24:17 Running command mv snowsql-1.2.24-linux_x86_64.bash /root
+
+[Container] 2023/03/10 09:24:17 Running command mv sql_script.sql /root
+
+[Container] 2023/03/10 09:24:17 Running command ls -a
+.
+..
+buildspec.yml
+snowsql-1.2.24-linux_x86_64.bash.sig
+
+[Container] 2023/03/10 09:24:17 Running command export SNOWSQL_DEST=/root/bin
+
+[Container] 2023/03/10 09:24:17 Running command export SNOWSQL_LOGIN_SHELL=/root/.profile
+
+[Container] 2023/03/10 09:24:17 Running command bash snowsql-1.2.24-linux_x86_64.bash
+bash: snowsql-1.2.24-linux_x86_64.bash: No such file or directory
+
+[Container] 2023/03/10 09:24:17 Command did not exit successfully bash snowsql-1.2.24-linux_x86_64.bash exit status 127
+[Container] 2023/03/10 09:24:17 Phase complete: INSTALL State: FAILED
+[Container] 2023/03/10 09:24:17 Phase context status code: COMMAND_EXECUTION_ERROR Message: Error while executing command: bash snowsql-1.2.24-linux_x86_64.bash. Reason: exit status 127
